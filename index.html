@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+</head>
+
+<body>
+	<h1>Ball Game</h1>
+	<button id="btnCreate">New Game</button>
+	<script>
+		const btnCreate = document.querySelector('#btnCreate');
+		let ws = new WebSocket('ws://localhost:9090');
+		btnCreate.addEventListener('click', e => {
+
+			const payLoad = {
+				"method": 'create',
+				"clientId": clientId
+			}
+			// send data to the server
+			ws.send(JSON.stringify(payLoad));
+		})
+		let clientId = 0;
+		ws.onmessage = message => {
+			// message.data = Json
+			const response = JSON.parse(message.data);
+			// let h1 = document.querySelector('#message');
+			// h1.innerHTML = `${response.method} + ${response.clientId}`;
+			// connect
+			if (response.method === 'connect') {
+				clientId = response.clientId;
+				console.log('clientId', clientId)
+			}
+			// create
+			if (response.method === 'create') {
+				clientId = response.clientId;
+				console.log('gameId ', response.game.id, 'balls ', response.game.balls)
+			}
+		}
+	</script>
+</body>
+
+</html>
