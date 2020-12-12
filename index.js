@@ -61,6 +61,8 @@ wsServer.on('request', (request) => {
         clientId: clientId,
         color: color,
       });
+
+      if (game.clients.length === 3) updateGameState();
       const payLoad = {
         method: 'join',
         game: game,
@@ -120,3 +122,20 @@ const guid = () =>
     S4() +
     S4()
   ).toLowerCase();
+
+function updateGameState() {
+  //{"gameid", content}
+  for (const g of Object.keys(games)) {
+    const game = games[g];
+    const payLoad = {
+      method: 'update',
+      game: game,
+    };
+
+    game.clients.forEach((c) => {
+      clients[c.clientId].connection.send(JSON.stringify(payLoad));
+    });
+  }
+
+  setTimeout(updateGameState, 500);
+}

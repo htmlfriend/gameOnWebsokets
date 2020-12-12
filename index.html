@@ -64,6 +64,19 @@
 				gameId = response.game.id;
 				console.log('gameId ', gameId, 'balls ', response.game.balls)
 			}
+
+			//update
+			if (response.method === "update") {
+				//{1: "red", 1}
+				if (!response.game.state) return;
+				for (const b of Object.keys(response.game.state)) {
+					const color = response.game.state[b];
+					const ballObject = document.getElementById("ball" + b);
+					ballObject.style.backgroundColor = color
+				}
+
+			}
+
 			//join
 			if (response.method === 'join') {
 				const game = response.game;

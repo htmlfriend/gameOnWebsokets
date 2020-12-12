@@ -5,3 +5,7 @@
 [![same pictures from app](https://github.com/htmlfriend/gameOnWebsokets/blob/master/2020-12-09_22-10-34.png)]
 ## third - play game
 [![same pictures from app](https://github.com/htmlfriend/gameOnWebsokets/blob/master/2020-12-11_21-52-44.png)]
+## update
+[![same pictures from app](https://github.com/htmlfriend/gameOnWebsokets/blob/master/2020-12-11_22-09-25.png)]
+## view the game
+[![same pictures from app](https://github.com/htmlfriend/gameOnWebsokets/blob/master/2020-12-11_22-22-55.png)]
