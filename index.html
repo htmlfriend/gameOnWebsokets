@@ -10,9 +10,36 @@
 <body>
 	<h1>Ball Game</h1>
 	<button id="btnCreate">New Game</button>
+	<button id="btnJoin">Join Game</button>
+	<input type="text" name="" id="txtGameId">
+	<div id="divPlayers"></div>
+
+	<div id='divBoard'></div>
+
 	<script>
-		const btnCreate = document.querySelector('#btnCreate');
+		let clientId = null;
+		let gameId = null;
+		let playerColor = null;
 		let ws = new WebSocket('ws://localhost:9090');
+		const btnCreate = document.querySelector('#btnCreate');
+		const btnJoin = document.querySelector('#btnJoin');
+		const txtGameId = document.querySelector('#txtGameId');
+		const divPlayers = document.querySelector('#divPlayers');
+		const divBoard = document.getElementById("divBoard");
+		// join to game
+		btnJoin.addEventListener('click', e => {
+			if (gameId === null) {
+				gameId = txtGameId.value;
+			}
+			const payLoad = {
+				"method": 'join',
+				"clientId": clientId,
+				"gameId": gameId
+			}
+			// send data to the server
+			ws.send(JSON.stringify(payLoad));
+		})
+
 		btnCreate.addEventListener('click', e => {
 
 			const payLoad = {
@@ -22,7 +49,6 @@
 			// send data to the server
 			ws.send(JSON.stringify(payLoad));
 		})
-		let clientId = 0;
 		ws.onmessage = message => {
 			// message.data = Json
 			const response = JSON.parse(message.data);
@@ -35,8 +61,51 @@
 			}
 			// create
 			if (response.method === 'create') {
-				clientId = response.clientId;
-				console.log('gameId ', response.game.id, 'balls ', response.game.balls)
+				gameId = response.game.id;
+				console.log('gameId ', gameId, 'balls ', response.game.balls)
+			}
+			//join
+			if (response.method === 'join') {
+				const game = response.game;
+				while (divPlayers.firstChild)
+					divPlayers.removeChild(divPlayers.firstChild)
+
+				game.clients.forEach(c => {
+
+					const d = document.createElement('div');
+					d.style.width = '200px';
+					d.style.background = c.color;
+					d.textContent = c.clientId;
+					divPlayers.appendChild(d)
+					if (c.clientId === clientId) playerColor = c.color;
+				})
+
+				//state of the game
+				while (divBoard.firstChild)
+					divBoard.removeChild(divBoard.firstChild)
+
+				for (let i = 0; i < game.balls; i++) {
+
+					const b = document.createElement("button");
+					b.id = "ball" + (i + 1);
+					b.tag = i + 1
+					b.textContent = i + 1
+					b.style.width = "150px"
+					b.style.height = "150px"
+					b.addEventListener("click", e => {
+						b.style.background = playerColor
+						const payLoad = {
+							"method": "play",
+							"clientId": clientId,
+							"gameId": gameId,
+							"ballId": b.tag,
+							"color": playerColor
+						}
+						ws.send(JSON.stringify(payLoad))
+					})
+					divBoard.appendChild(b);
+				}
+
 			}
 		}
 	</script>

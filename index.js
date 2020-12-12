@@ -1,3 +1,4 @@
+const { response } = require('express');
 const http = require('http');
 const app = require('express')();
 app.listen(9091, () => console.log('express server on 9091'));
@@ -33,6 +34,7 @@ wsServer.on('request', (request) => {
       games[gameId] = {
         id: gameId,
         balls: 20,
+        clients: [],
       };
       const payLoad = {
         method: 'create',
@@ -41,6 +43,44 @@ wsServer.on('request', (request) => {
       // send info to the client
       const con = clients[clientId].connection;
       con.send(JSON.stringify(payLoad));
+    }
+
+    // join method
+    if (result.method === 'join') {
+      // know client and gameid
+      const clientId = result.clientId;
+      const gameId = result.gameId;
+      const game = games[gameId];
+      // color for client
+      if (game.clients.length >= 3) {
+        // max players reach
+        return;
+      }
+      const color = { 0: 'Red', 1: 'Green', 2: 'Blue' }[game.clients.length];
+      game.clients.push({
+        clientId: clientId,
+        color: color,
+      });
+      const payLoad = {
+        method: 'join',
+        game: game,
+      };
+      // send to all players
+      game.clients.forEach((c) => {
+        clients[c.clientId].connection.send(JSON.stringify(payLoad));
+      });
+    }
+
+    // play
+    if (result.method === 'play') {
+      const gameId = result.gameId;
+      const ballId = result.ballId;
+      const color = result.color;
+      let state = games[gameId].state;
+      if (!state) state = {};
+
+      state[ballId] = color;
+      games[gameId].state = state;
     }
   });
   // answer to clients
